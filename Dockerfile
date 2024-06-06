@@ -1,7 +1,7 @@
 FROM cr.yandex/mirror/ubuntu:22.04
 
 ENV DEBIAN_FRONTEND noninteractive
-ENV PATH="${PATH}:/opt/KasperskyOS-Community-Edition-1.2.0.45/toolchain/bin:/home/user/.local/bin"
+ENV PATH="${PATH}:/opt/KasperskyOS-Community-Edition-1.2.0.89/toolchain/bin:/home/user/.local/bin"
 RUN apt-get update && \
     apt install -y \
         net-tools \
@@ -28,13 +28,12 @@ RUN apt-get update && \
         && adduser --disabled-password --gecos "" user \
         && echo 'user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers
 
-COPY ./KasperskyOS-Community-Edition-1.2.0.45.zip /tmp
-
-RUN unzip /tmp/KasperskyOS-Community-Edition-1.2.0.45 -d /opt \
-    && rm /tmp/*.zip \
-    && ln -s /opt/KasperskyOS-Community-Edition-1.2.0.45 /opt/KasperskyOS-Local-Edition \
-    && echo '/opt/KasperskyOS-Community-Edition-1.2.0.45/toolchain/lib' >> /etc/ld.so.conf.d/KasperskyOS.conf \
-    && echo '/opt/KasperskyOS-Community-Edition-1.2.0.45/toolchain/x86_64-pc-linux-gnu/aarch64-kos/lib/' >> /etc/ld.so.conf.d/KasperskyOS.conf \
+COPY ./KasperskyOS-Community-Edition-1.2.0.89_en.deb /tmp
+RUN apt-get update && apt install -y --fix-broken /tmp/KasperskyOS-Community-Edition-1.2.0.89_en.deb \
+    && rm /tmp/*.deb \
+    && ln -s /opt/KasperskyOS-Community-Edition-1.2.0.89 /opt/KasperskyOS-Local-Edition \
+    && echo '/opt/KasperskyOS-Community-Edition-1.2.0.89/toolchain/lib' >> /etc/ld.so.conf.d/KasperskyOS.conf \
+    && echo '/opt/KasperskyOS-Community-Edition-1.2.0.89/toolchain/x86_64-pc-linux-gnu/aarch64-kos/lib/' >> /etc/ld.so.conf.d/KasperskyOS.conf \
     && ldconfig
 
 RUN su -c 'pip3 install PyYAML mavproxy pymavlink --user --upgrade' user
