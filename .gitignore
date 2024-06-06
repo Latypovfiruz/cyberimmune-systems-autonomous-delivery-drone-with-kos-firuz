@@ -40,7 +40,11 @@ build
 # manual backups
 *.bkp
 
+# archives
 *.zip
+
+# packages
+*.deb
 
 # Ignore IDE files.
 .vscode/
