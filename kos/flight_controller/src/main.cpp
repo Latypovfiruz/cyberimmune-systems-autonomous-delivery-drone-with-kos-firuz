@@ -43,6 +43,25 @@ int sendSignedMessage(char* method, char* response, char* errorMessage, uint8_t 
     return 1;
 }
 
+void avoidObstacles() {
+    char obstacleData[1024] = {0};
+    while (true) {
+        if (sendSignedMessage("/api/get_obstacles", obstacleData, "obstacle data", RETRY_DELAY_SEC)) {
+            if (parseObstacleData(obstacleData)) {
+                fprintf(stderr, "[%s] Info: Obstacles detected. Initiating avoidance maneuvers\n", ENTITY_NAME);
+                if (!performAvoidanceManeuvers()) {
+                    fprintf(stderr, "[%s] Warning: Failed to perform avoidance maneuvers. Retrying in %ds\n", ENTITY_NAME, RETRY_DELAY_SEC);
+                }
+            } else {
+                fprintf(stderr, "[%s] Info: No obstacles detected\n", ENTITY_NAME);
+            }
+        } else {
+            fprintf(stderr, "[%s] Warning: Failed to get obstacle data. Retrying in %ds\n", ENTITY_NAME, RETRY_DELAY_SEC);
+        }
+        usleep(FLY_ACCEPT_PERIOD_US);
+    }
+}
+
 int main(void) {
     // Before doing anything, we need to ensure that other modules are ready to work
     while (!waitForInit("periphery_controller_connection", "PeripheryController")) {
@@ -133,6 +152,9 @@ int main(void) {
             fprintf(stderr, "[%s] Warning: Failed to get current coordinates. Trying again in %ds\n", ENTITY_NAME, RETRY_DELAY_SEC);
         }
         usleep(FLY_ACCEPT_PERIOD_US);
+
+        // Проверка наличия препятствий
+        avoidObstacles();
     }
 
     return EXIT_SUCCESS;
